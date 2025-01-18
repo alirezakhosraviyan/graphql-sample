@@ -54,9 +54,6 @@ jobs:
         set +o allexport
       shell: bash
 
-    - name: Verify environment variables
-      run: echo "Loaded DATABASE_URI: $DATABASE_URI"
-
     - name: Run checks
       env:
         DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
@@ -65,4 +62,4 @@ jobs:
     - name: Run tests
       env:
         DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
-      run: poetry run pytest
+      run: make test
