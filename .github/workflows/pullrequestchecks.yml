@@ -46,12 +46,12 @@ jobs:
         cp .env.test.example .env.test
         echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
 
-    - name: Export .env.test
-      id: env
+    - name: Export .env.test to GITHUB_ENV
       run: |
         set -o allexport
         source .env.test
         set +o allexport
+        cat .env.test | grep -v '^#' >> $GITHUB_ENV
       shell: bash
 
     - name: Verify environment variables
@@ -59,11 +59,7 @@ jobs:
         echo "Loaded DATABASE_URI: $DATABASE_URI"
 
     - name: Run checks
-      env:
-        DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
       run: make check
 
     - name: Run tests
-      env:
-        DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
       run: poetry run pytest
