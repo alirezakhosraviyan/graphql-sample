@@ -10,6 +10,8 @@ jobs:
   check-and-test:
     name: Run Checks and Tests
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URI: postgresql+asyncpg://test_user:test_password@0.0.0.0:5432/test_db
 
     services:
       postgres:
@@ -40,23 +42,6 @@ jobs:
 
     - name: Install dependencies
       run: make install
-
-    - name: Prepare .env.test
-      run: |
-        cp .env.test.example .env.test
-        echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
-    
-    - name: Check .env.test existence
-      run: |
-        echo "Contents of .env.test:"
-        cat .env.test
-        pwd
-        
-    - name: Load .env file
-      uses: aarcangeli/load-dotenv@v1
-      with:
-        path: graphql-sample/.env.test
-        expand: true
 
     - name: Verify environment variables
       run: |
