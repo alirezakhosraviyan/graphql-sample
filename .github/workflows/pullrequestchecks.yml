@@ -1,40 +1,53 @@
-name: Pull-Request-Checks
-on: [push]
+name: Check and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
 jobs:
-  build:
+  check-and-test:
+    name: Run Checks and Tests
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URI: sqlite+aiosqlite:///testdb.db
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user -d test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.12
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: cache poetry install
-        uses: actions/cache@v2
-        with:
-          path: ~/.local
-          key: poetry-1.4.2-0
+    - name: Install Poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
 
-      - uses: snok/install-poetry@v1
-        with:
-          version: 1.4.2
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+    - name: Install dependencies
+      run: make install
 
-      - name: cache deps
-        id: cache-deps
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: pydeps-${{ hashFiles('**/poetry.lock') }}
+    - name: Set up test environment
+      run: |
+        cp .env.test.example .env.test
+        echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
 
-      - run: poetry install --no-interaction --no-root
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+    - name: Run checks
+      run: make check
 
-      - run: poetry install --no-interaction
-      - run: poetry run ruff check .
-      - run: poetry run mypy .
-      - run: poetry run pytest
+    - name: Run tests
+      run: make test
