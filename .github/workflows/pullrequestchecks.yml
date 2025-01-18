@@ -62,4 +62,4 @@ jobs:
     - name: Run tests
       env:
         DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
-      run: make test
+      run: poetry run pytest
