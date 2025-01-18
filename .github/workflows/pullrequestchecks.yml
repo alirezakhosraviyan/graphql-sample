@@ -55,7 +55,7 @@ jobs:
     - name: Load .env file
       uses: aarcangeli/load-dotenv@v1
       with:
-        path: .env.test
+        path: graphql-sample/.env.test
         expand: true
 
     - name: Verify environment variables
