@@ -45,7 +45,13 @@ jobs:
       run: |
         cp .env.test.example .env.test
         echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
-
+    
+    - name: Check .env.test existence
+      run: |
+        echo "Contents of .env.test:"
+        cat .env.test
+        echo "C
+        
     - name: Load .env file
       uses: aarcangeli/load-dotenv@v1
       with:
