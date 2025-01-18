@@ -50,4 +50,4 @@ jobs:
       run: make check
 
     - name: Run tests
-      run: make test
+      run: poetry run pytest
