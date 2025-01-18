@@ -41,18 +41,11 @@ jobs:
     - name: Install dependencies
       run: make install
 
-    - name: Prepare .env.test
-      run: |
-        cp .env.test.example .env.test
-        echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
-
-    - name: Export .env.test to GITHUB_ENV
-      run: |
-        set -o allexport
-        source .env.test
-        set +o allexport
-        cat .env.test | grep -v '^#' >> $GITHUB_ENV
-      shell: bash
+    - name: Load .env file
+      uses: aarcangeli/load-dotenv@v1
+      with:
+        path: .env.test
+        expand: true
 
     - name: Verify environment variables
       run: |
