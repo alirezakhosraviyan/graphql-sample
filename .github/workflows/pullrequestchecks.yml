@@ -41,13 +41,28 @@ jobs:
     - name: Install dependencies
       run: make install
 
-    - name: Set up test environment
+    - name: Prepare .env.test
       run: |
         cp .env.test.example .env.test
         echo "DATABASE_URI=postgresql+asyncpg://test_user:test_password@localhost/test_db" >> .env.test
 
+    - name: Export .env.test
+      id: env
+      run: |
+        set -o allexport
+        source .env.test
+        set +o allexport
+      shell: bash
+
+    - name: Verify environment variables
+      run: echo "Loaded DATABASE_URI: $DATABASE_URI"
+
     - name: Run checks
+      env:
+        DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
       run: make check
 
     - name: Run tests
+      env:
+        DATABASE_URI: ${{ steps.env.outputs.DATABASE_URI }}
       run: poetry run pytest
