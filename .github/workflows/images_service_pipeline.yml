@@ -1,4 +1,4 @@
-name: Check and Test
+name: Images Service QA
 
 on:
   push:
@@ -41,11 +41,9 @@ jobs:
       run: curl -sSL https://install.python-poetry.org | python3 -
 
     - name: Install dependencies
-      run: make install
-
-    - name: Verify environment variables
       run: |
-        echo "Loaded DATABASE_URI: $DATABASE_URI"
+        cd images_service
+        make install
 
     - name: Run checks
       run: make check
