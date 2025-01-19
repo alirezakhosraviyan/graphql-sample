@@ -1,0 +1,16 @@
+{
+  "name": "gateway_service",
+  "version": "1.0.0",
+  "main": "apollo.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@apollo/gateway": "^2.9.3",
+    "@apollo/server": "^4.11.3",
+    "dotenv": "^16.4.7"
+  }
+}

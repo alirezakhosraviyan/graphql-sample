@@ -1,0 +1,54 @@
+name: Check and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-and-test:
+    name: Run Checks and Tests
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URI: postgresql+asyncpg://test_user:test_password@0.0.0.0:5432/test_db
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user -d test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: make install
+
+    - name: Verify environment variables
+      run: |
+        echo "Loaded DATABASE_URI: $DATABASE_URI"
+
+    - name: Run checks
+      run: make check
+
+    - name: Run tests
+      run: poetry run pytest

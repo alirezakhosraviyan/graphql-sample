@@ -5,9 +5,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import SQLModel
 
-from app.db import get_db_engine, get_session
-from app.main import app
-from app.products.models import Image, Product, ProductStatus
+from products_app.db import get_db_engine, get_session
+from products_app.app import create_app
+from products_app.models import Product, ProductStatus
 
 
 async def seed_data() -> None:
@@ -18,12 +18,6 @@ async def seed_data() -> None:
     async with get_session() as session:
         session.add_all([product1, product2])
         await session.commit()
-
-        image1 = Image(url="http://example.com/image1.jpg", priority=1, product_id=product1.id)
-        session.add(image1)
-
-        await session.commit()
-
 
 @pytest.fixture(scope="function", autouse=True)
 async def setup_test_env() -> AsyncGenerator[None, None]:
@@ -41,5 +35,6 @@ async def setup_test_env() -> AsyncGenerator[None, None]:
 @pytest.fixture
 async def client() -> AsyncGenerator[TestClient, None]:
     """Provide an HTTP client for testing."""
+    app = create_app()
     with TestClient(app) as client:
         yield client

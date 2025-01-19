@@ -1,3 +1,5 @@
 .idea
-.env.test
+*/.env.test
 */__pycache__/*
+*/node_modules
+*/dist
