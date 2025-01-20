@@ -1,0 +1,60 @@
+name: Producs Service QA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-and-test:
+    name: Products Service QA
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTS_SERVICE__POSTGRES_PASSWORD: password
+      PRODUCTS_SERVICE__POSTGRES_USER: postgres
+      PRODUCTS_SERVICE__POSTGRES_DB: testdb
+      PRODUCTS_SERVICE__POSTGRES_PORT: 5432
+      PRODUCTS_SERVICE__POSTGRES_HOST: 0.0.0.0
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: |
+        cd products_service
+        make install
+
+    - name: Run checks
+      run: |
+        cd products_service
+        make check
+
+    - name: Run tests
+      run: |
+        cd products_service
+        poetry run pytest

@@ -1,0 +1,60 @@
+name: Images Service QA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-and-test:
+    name: Images Service QA
+    runs-on: ubuntu-latest
+    env:
+      IMAGES_SERVICE__POSTGRES_PASSWORD: password
+      IMAGES_SERVICE__POSTGRES_USER: postgres
+      IMAGES_SERVICE__POSTGRES_DB: testdb
+      IMAGES_SERVICE__POSTGRES_PORT: 5432
+      IMAGES_SERVICE__POSTGRES_HOST: 0.0.0.0
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: |
+        cd images_service
+        make install
+
+    - name: Run checks
+      run: |
+        cd images_service
+        make check
+
+    - name: Run tests
+      run: |
+        cd images_service
+        poetry run pytest

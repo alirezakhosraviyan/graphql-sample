@@ -1,0 +1,77 @@
+services:
+  images-service:
+    build:
+      context: ./images_service
+      dockerfile: Dockerfile
+    command: sh -c 'sleep 2; alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000'
+    env_file:
+      - ./images_service/.env
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  products-service:
+    build:
+      context: ./products_service
+      dockerfile: Dockerfile
+    command: sh -c 'sleep 2; alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000'
+    env_file:
+      - ./products_service/.env
+    networks:
+      - backend
+    depends_on:
+      - db
+
+  gateway-service:
+    build:
+      context: ./gateway_service
+      dockerfile: Dockerfile
+    command: sh -c 'sleep 5; node index.js'
+    env_file:
+      - ./gateway_service/.env
+    networks:
+      - backend
+    depends_on:
+      - products-service
+      - images-service
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d/
+    networks:
+      - backend
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+        
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Point to fixed nginx.conf
+    ports:
+      - "81:80"  # Expose NGINX on port 80
+    networks:
+      - backend
+    depends_on:
+      - products-service
+      - images-service
+      - gateway-service
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
