@@ -1,5 +1,5 @@
-from sqlmodel import select, func
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import func, select
 
 from products_app.models import Product, ProductStatus
 
@@ -20,8 +20,7 @@ class ProductRepository:
     @staticmethod
     async def search_products_by_name(search: str, session: AsyncSession) -> list[Product]:
         stmt = select(Product).where(
-            Product.status == ProductStatus.ACTIVE,
-            func.to_tsvector("english", Product.name).match(search)
+            Product.status == ProductStatus.ACTIVE, func.to_tsvector("english", Product.name).match(search)
         )
         result = await session.scalars(stmt)
         return list(result.all())

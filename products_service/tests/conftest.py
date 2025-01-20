@@ -1,13 +1,13 @@
-import os
 from collections.abc import AsyncGenerator
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import SQLModel
 
-from products_app.db import get_db_engine, get_session
 from products_app.app import create_app
+from products_app.db import get_db_engine, get_session
 from products_app.models import Product, ProductStatus
+from products_app.settings import settings
 
 
 async def seed_data() -> None:
@@ -19,11 +19,11 @@ async def seed_data() -> None:
         session.add_all([product1, product2])
         await session.commit()
 
+
 @pytest.fixture(scope="function", autouse=True)
 async def setup_test_env() -> AsyncGenerator[None, None]:
     """Sets up the database environment for testing."""
-    database_uri = os.environ.get("DATABASE_URI", "postgresql+asyncpg://user:password@localhost/test_db")
-    engine = get_db_engine(database_uri)
+    engine = get_db_engine(settings.DATABASE_URI)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
     await seed_data()

@@ -1,4 +1,5 @@
 import strawberry
+
 from products_app.models import ProductStatus
 from products_app.services import ProductService
 
@@ -42,23 +43,13 @@ class Mutation:
     @strawberry.mutation
     async def create_product(self, inp: ProductInput) -> ProductType:
         product = await ProductService.create_product(inp)
-        return ProductType(
-            id=product.id,
-            name=product.name,
-            price=product.price,
-            status=product.status
-        )
+        return ProductType(id=product.id, name=product.name, price=product.price, status=product.status)
 
     @strawberry.mutation
     async def update_product(self, product_id: int, input: ProductInput) -> ProductType | None:
         product = await ProductService.update_product(product_id, input)
         if product:
-            return ProductType(
-                id=product.id,
-                name=product.name,
-                price=product.price,
-                status=product.status
-            )
+            return ProductType(id=product.id, name=product.name, price=product.price, status=product.status)
         return None
 
     @strawberry.mutation

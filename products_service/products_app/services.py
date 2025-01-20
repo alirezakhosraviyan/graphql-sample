@@ -1,6 +1,6 @@
+from products_app.db import get_session
 from products_app.models import Product
 from products_app.repository import ProductRepository
-from products_app.db import get_session
 
 
 class ProductService:
@@ -20,13 +20,13 @@ class ProductService:
             return await ProductRepository.search_products_by_name(search, session)
 
     @staticmethod
-    async def create_product(inp: "ProductInput") -> Product:
+    async def create_product(inp: "ProductInput") -> Product:  # type: ignore  # noqa
         async with get_session() as session:
             product = Product(name=inp.name, price=inp.price, status=inp.status)
             return await ProductRepository.create_product(product, session)
 
     @staticmethod
-    async def update_product(product_id: int, inp: "ProductInput") -> Product | None:
+    async def update_product(product_id: int, inp: "ProductInput") -> Product | None:  # type: ignore  # noqa
         async with get_session() as session:
             product = await ProductRepository.get_product_by_id(product_id, session)
             if product:

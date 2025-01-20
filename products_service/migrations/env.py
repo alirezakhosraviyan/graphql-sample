@@ -10,7 +10,6 @@ from sqlmodel import SQLModel
 from products_app.models import Product  # noqa
 from products_app.settings import settings
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -29,7 +28,7 @@ target_metadata = SQLModel.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URI)  # type: ignore
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URI)
 
 
 def run_migrations_offline() -> None:
