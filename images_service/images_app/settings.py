@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
 
-    @computed_field
+    @computed_field  # type: ignore
     @property
     def DATABASE_URI(self) -> str:
         return f"postgresql+asyncpg://{quote(self.POSTGRES_USER)}:{quote(self.POSTGRES_PASSWORD)}@{quote(self.POSTGRES_HOST)}:{self.POSTGRES_PORT}/{quote(self.POSTGRES_DB)}"

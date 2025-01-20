@@ -5,8 +5,8 @@ from .services import (
     create_image_service,
     delete_image_service,
     get_all_images_service,
-    get_image_by_product_id_service,
     get_image_service,
+    get_images_by_product_id_service,
     update_image_service,
 )
 
@@ -29,7 +29,11 @@ class ImageInput:
 @strawberry.federation.type(keys=["id"])
 class ProductType:
     id: int
-    images: list[ImageType] = strawberry.field(resolver=lambda root: get_image_by_product_id_service(root.id))
+
+    @strawberry.field
+    async def images(self) -> list[ImageType]:
+        images = await get_images_by_product_id_service(self.id)
+        return [ImageType(**image.model_dump()) for image in images]
 
 
 @strawberry.type
@@ -58,7 +62,7 @@ class Mutation:
     @strawberry.mutation
     async def update_image(self, image_id: int, updates: ImageInput) -> ImageType | None:
         async with get_session() as session:
-            image = await update_image_service(session, image_id, updates.dict())
+            image = await update_image_service(session, image_id, strawberry.asdict(updates))
             return ImageType(**image.model_dump()) if image else None
 
     @strawberry.mutation

@@ -4,7 +4,7 @@ from sqlmodel import select
 from .models import Image
 
 
-async def create_image(session: AsyncSession, image_data: dict) -> Image:
+async def create_image(session: AsyncSession, image_data: dict[str, object]) -> Image:
     image = Image(**image_data)
     session.add(image)
     await session.commit()
@@ -17,10 +17,10 @@ async def get_image_by_id(session: AsyncSession, image_id: int) -> Image | None:
     return result
 
 
-async def get_image_by_product_id(session: AsyncSession, product_id: int) -> Image | None:
+async def get_images_by_product_id(session: AsyncSession, product_id: int) -> list[Image]:
     stmt = select(Image).where(Image.product_id == product_id)
-    res = await session.execute(stmt)
-    return res.first()
+    res = await session.scalars(stmt)
+    return list(res.all())
 
 
 async def get_all_images(session: AsyncSession) -> list[Image]:
@@ -28,7 +28,7 @@ async def get_all_images(session: AsyncSession) -> list[Image]:
     return list(result.all())
 
 
-async def update_image(session: AsyncSession, image_id: int, updates: dict) -> Image | None:
+async def update_image(session: AsyncSession, image_id: int, updates: dict[str, object]) -> Image | None:
     image = await get_image_by_id(session, image_id)
     if image:
         for key, value in updates.items():

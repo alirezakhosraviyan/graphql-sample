@@ -11,7 +11,7 @@ from images_app.settings import settings
 
 
 @pytest.fixture
-async def seed_images():
+async def seed_images() -> list[Image]:
     async with get_session() as session:
         images = [
             Image(url="http://example.com/image1.jpg", priority=50, product_id=1),

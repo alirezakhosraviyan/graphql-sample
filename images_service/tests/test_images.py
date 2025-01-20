@@ -1,4 +1,9 @@
-async def test_create_image(fastapi_client):
+from fastapi.testclient import TestClient
+
+from images_app.models import Image
+
+
+async def test_create_image(fastapi_client: TestClient) -> None:
     query = """
         mutation CreateImage($input: ImageInput!) {
             createImage(inp: $input) {
@@ -19,7 +24,7 @@ async def test_create_image(fastapi_client):
     assert data["data"]["createImage"]["productId"] == 4
 
 
-async def test_get_all_images(fastapi_client, seed_images):
+async def test_get_all_images(fastapi_client: TestClient, seed_images: list[Image]) -> None:
     query = """
         query {
             getAllImages {
@@ -42,7 +47,7 @@ async def test_get_all_images(fastapi_client, seed_images):
         assert image["productId"] == expected.product_id
 
 
-async def test_delete_image(fastapi_client, seed_images):
+async def test_delete_image(fastapi_client: TestClient, seed_images: list[Image]) -> None:
     query = """
         mutation DeleteImage($imageId: Int!) {
             deleteImage(imageId: $imageId)
@@ -57,7 +62,7 @@ async def test_delete_image(fastapi_client, seed_images):
     assert data["data"]["deleteImage"] == "Image deleted successfully."
 
 
-async def test_get_image_by_id(fastapi_client, seed_images):
+async def test_get_image_by_id(fastapi_client: TestClient, seed_images: list[Image]) -> None:
     query = """
         query GetImage($imageId: Int!) {
             getImage(imageId: $imageId) {
