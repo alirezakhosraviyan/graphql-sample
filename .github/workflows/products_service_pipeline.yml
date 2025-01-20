@@ -1,4 +1,4 @@
-name: Production QA
+name: Producs Service QA
 
 on:
   push:
@@ -11,19 +11,23 @@ jobs:
     name: Products Service QA
     runs-on: ubuntu-latest
     env:
-      DATABASE_URI: postgresql+asyncpg://test_user:test_password@0.0.0.0:5432/test_db
+      PRODUCTS_SERVICE__POSTGRES_PASSWORD: password
+      PRODUCTS_SERVICE__POSTGRES_USER: postgres
+      PRODUCTS_SERVICE__POSTGRES_DB: testdb
+      PRODUCTS_SERVICE__POSTGRES_PORT: 5432
+      PRODUCTS_SERVICE__POSTGRES_HOST: 0.0.0.0
 
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testdb
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U test_user -d test_db"
+          --health-cmd="pg_isready -U postgres -d testdb"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -35,7 +39,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.12'
 
     - name: Install Poetry
       run: curl -sSL https://install.python-poetry.org | python3 -
