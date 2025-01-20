@@ -12,7 +12,3 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 RUN poetry install --no-root --only main
 COPY . /app/
 ENV PYTHONPATH=/app
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-
